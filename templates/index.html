@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection System</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        input, select, button { padding: 10px; margin: 10px; font-size: 16px; }
+        button { cursor: pointer; }
+        .result { font-size: 18px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Fraud Detection System</h1>
+    <form id="predictForm">
+        <label for="TransactionNumber">Transaction Number:</label>
+        <input type="text" id="TransactionNumber" name="TransactionNumber" required><br>
+        
+        <label for="TransactionAmount">Transaction Amount:</label>
+        <input type="number" step="0.01" id="TransactionAmount" name="TransactionAmount" required><br>
+        
+        <label for="model_choice">Select Model:</label>
+        <select id="model_choice" name="model_choice">
+            <option value="LogisticRegression">Logistic Regression</option>
+            <option value="DecisionTree">Decision Tree</option>
+            <option value="RandomForest">Random Forest</option>
+            <option value="KNN">K-Nearest Neighbors</option>
+        </select><br>
+        
+        <button type="submit">Predict Fraud</button>
+    </form>
+    <div class="result" id="result"></div>
+
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                if (data.error) {
+                    resultDiv.textContent = `Error: ${data.error}`;
+                    resultDiv.style.color = 'red';
+                } else {
+                    let text = `Result: ${data.result}`;
+                    if (data.probability !== null) {
+                        text += ` (Probability: ${data.probability.toFixed(2)})`;
+                    }
+                    resultDiv.textContent = text;
+                    resultDiv.style.color = data.result === 'Fraud' ? 'red' : 'green';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
